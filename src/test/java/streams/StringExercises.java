@@ -3,6 +3,7 @@ package streams;
 import org.junit.Test;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -58,7 +59,10 @@ public class StringExercises {
     @Test  // Use Comparator.comparingInt
     public void stringLengthSort_comparingInt() {
         List<String> sorted = strings.stream()
-                .sorted(Comparator.comparingInt(String::length))
+                .sorted(Comparator.comparingInt(String::length)
+                        .reversed()
+                        .thenComparing(Comparator.naturalOrder())
+                )
                 .collect(Collectors.toList());
         System.out.println(sorted);
     }
@@ -69,7 +73,7 @@ public class StringExercises {
         // Add them to a LinkedList
         LinkedList<String> collected = strings.stream()
                 .filter((string) -> string.length() % 2 == 0)
-                .collect(LinkedList::new, LinkedList::add, LinkedList::addAll);
+                .collect(Collectors.toCollection(LinkedList::new)); //can also do- LinkedList::new, LinkedList::add, LinkedList::addAll
 
         System.out.println(collected);
         System.out.println(collected.getClass().getName());
@@ -77,8 +81,15 @@ public class StringExercises {
 
         // Add the strings to a map of string to length
         Map<String, Integer> map = strings.stream()
-                .collect(Collectors.toMap(String::new, String::length));
+                .collect(Collectors.toMap(Function.identity(), String::length));
         map.forEach((word,size) -> System.out.printf("The size of %s is %d%n", word, size));
+        System.out.println();
+
+        //TODO: how to do reverse and natural order sorting on Map.Entry::getKey
+        map.entrySet().stream()
+                .sorted(Comparator.comparingInt(Map.Entry::getValue))
+                .forEach(entry -> System.out.printf(String.format("The size of %s is %d%n" , entry.getKey(), entry.getValue())));
+        System.out.println();
 
         List<String> myStrings = Arrays.asList("this", "is", null, "a", null,
                 "list", "of", null, "strings");
